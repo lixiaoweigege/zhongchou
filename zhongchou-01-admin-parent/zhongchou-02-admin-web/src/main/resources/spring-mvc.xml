@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	<!-- 开启自动包扫描 -->
+	<context:component-scan base-package="com.dushan.zhongchou.mvc.*"></context:component-scan>
+	<!-- 配置视图解析器 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+<!-- 注解驱动，必须有，预防默认映射器失效时可以使用RequestMappingHandlerMapping，从而可以映射我们的handler方法。 -->
+<mvc:annotation-driven></mvc:annotation-driven>
+<!-- 配置view-controller -->
+<!-- view-controller的path属性的值不能省略html扩展名 -->
+<mvc:view-controller path="/admin/to/login/page.html" view-name="admin-login"/>
+<mvc:view-controller path="/admin/to/main/page.html" view-name="admin-main"/>
+<mvc:view-controller path="/admin/to/index.html" view-name="index"/>
+<mvc:view-controller path="/admin/to/add/page.html" view-name="admin-add"/>
+
+
+<!-- 配置登录拦截器 -->
+<mvc:interceptors>
+	<mvc:interceptor>
+	<mvc:mapping path="/**"/>
+	<mvc:exclude-mapping path="/admin/to/login/page.html"/>
+	<mvc:exclude-mapping path="/admin/to/index.html"/>
+	<mvc:exclude-mapping path="/admin/do/login.html"/>
+	<bean class="com.dushan.zhongchou.mvc.intercepter.LoginIntercepter"></bean>
+	</mvc:interceptor>
+</mvc:interceptors>
+<!-- 配置基于XML的异常映射 -->
+<!-- 说明：这是基于注解的异常映射的补充。 -->
+<!-- 使用@RequestMapping映射的请求抛出的异常由基于注解的异常映射处理 -->
+<!-- 使用mvc:view-controller映射的请求由基于XML的异常映射处理 -->
+<bean id="simpleMappingExceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+	<property name="exceptionMappings">
+		<props>
+			<prop key="com.dushan.zhongchou.exception.AccessDeniedException">admin-login</prop>
+		</props>
+	</property>
+</bean>
+</beans>

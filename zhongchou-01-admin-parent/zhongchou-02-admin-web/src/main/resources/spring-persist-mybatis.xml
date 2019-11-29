@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- 加载外部属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	
+	<!-- 配置数据源 -->
+	<bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="driverClassName" value="${jdbc.driver}"/>
+	</bean>
+	
+	<!-- 配置SqlSessionFactoryBean -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	
+		<!-- 装配数据源 -->
+		<property name="dataSource" ref="druidDataSource"/>
+		
+		<!-- 指定MyBatis全局配置文件位置 -->
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+		
+		<!-- 指定Mapper.xml配置文件位置 -->
+		<property name="mapperLocations" value="classpath:mybatis/mapper/*Mapper.xml"/>
+		
+		<!-- 配置MyBatis插件 -->
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<!-- PageHelper插件有一些属性需要设置 -->
+						<props>
+							<!-- 数据库方言：指定当前具体使用的数据库 -->
+							<prop key="dialect">mysql</prop>
+							
+							<!-- 启用“合理化修正”功能 -->
+							<!-- 让PageHelper将页码在1~总页数之间修正 -->
+							<prop key="reasonable">true</prop>
+						</props>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+	
+	<!-- 配置Mapper接口扫描器 -->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.dushan.zhongchou.mapper"/>
+	</bean>
+	
+</beans>

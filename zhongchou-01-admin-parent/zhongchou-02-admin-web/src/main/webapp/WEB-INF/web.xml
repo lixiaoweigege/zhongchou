@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns="http://java.sun.com/xml/ns/javaee" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>zhongchou-02-admin-web</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <!-- 配置ContextLoaderLister加载spring的配置文件 -->
+	<!-- needed for ContextLoaderListener -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring-persist-*.xml</param-value>
+	</context-param>
+
+	<!-- Bootstraps the root web application context before servlet initialization -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- The front controller of this Spring Web application, responsible for 
+		handling all application requests -->
+	<servlet>
+		<servlet-name>springDispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:spring-mvc.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- 配置前端控制器(springMVC中央控制器) -->
+	<!-- Map all requests to the DispatcherServlet for handling -->
+	<servlet-mapping>
+		<servlet-name>springDispatcherServlet</servlet-name>
+		<!-- 伪静态：将服务器的动态资源伪装成一个静态资源 -->
+		<!-- 让SpringMVC映射html扩展名之后所有以html结尾的请求都会由SpringMVC处理， -->
+		<!-- 这样服务器的一个动态资源表面上看起来就是请求一个HTML页面，从而看上去像是一个静态资源。 -->
+		<!-- 伪静态的好处1：不让别人轻易猜到后端技术 -->
+		<!-- 伪静态的好处2：有利于SEO优化 -->
+		<!-- 缺点：映射扩展名这样的做法不符合REST风格要求 -->
+		<url-pattern>*.html</url-pattern>
+		<!-- 注意的问题：Ajax请求，服务器端实际返回JOSN，但是如果请求扩展名是html，那么Tomcat会返回406错误。 -->
+		<!-- 解决办法：要么专门使用json作为扩展名，要么使用一个HTTP协议在MIME类型中没有定义的扩展名，例如：atguigu -->
+		<url-pattern>*.json</url-pattern>
+	</servlet-mapping>
+	<!-- 配置处理字符集的Filter -->
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceRequestEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceResponseEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+</web-app>

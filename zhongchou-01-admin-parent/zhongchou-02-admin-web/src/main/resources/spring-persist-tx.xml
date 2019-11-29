@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<!-- 配置自动扫描的包 -->
+	<context:component-scan base-package="com.dushan.zhongchou.service.*"/>
+	
+	<!-- 配置事务管理器 -->
+	<bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="druidDataSource"/>
+	</bean>
+	
+	<!-- 配置事务切面 -->
+	<aop:config>
+		<!-- 配置事务切面的切入点表达式 -->
+		<aop:pointcut expression="execution(* *..*Service.*(..))" id="txPointCut"/>
+		
+		<!-- 让切入点表达式关联事务通知 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>
+	</aop:config>
+	
+	<!-- 配置事务通知 -->
+	<!-- transaction-manager的默认值是transactionManager，如果事务管理器的bean的id就是transactionManager，则可以省略transaction-manager属性 -->
+	<tx:advice id="txAdvice" transaction-manager="dataSourceTransactionManager">
+		<!-- 配置事务属性 -->
+		<tx:attributes>
+			<!-- 查询方法配置为只读属性 -->
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="query*" read-only="true"/>
+			<tx:method name="find*" read-only="true"/>
+			<tx:method name="count*" read-only="true"/>
+			
+			<!-- 增删改方法：传播行为、回滚异常 -->
+			<!-- 传播行为REQUIRED：当前事务方法必须运行在事务中，如果没有就新开一个，如果有就在现在的事务中运行 -->
+			<!-- 传播行为REQUIRES_NEW：当前事务方法必须运行在事务中，且必须是自己新开的事务，这样能避免和其他操作共用事务 -->
+			<!-- 回滚的异常：运行时异常和编译时异常都回滚 -->
+			<tx:method name="save*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+			<tx:method name="update*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+			<tx:method name="alter*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+			<tx:method name="remove*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+			<tx:method name="delete*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+			<tx:method name="batch*" propagation="REQUIRES_NEW" rollback-for="java.lang.Exception"/>
+		</tx:attributes>
+	</tx:advice>
+
+</beans>
